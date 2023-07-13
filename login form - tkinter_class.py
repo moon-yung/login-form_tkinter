@@ -72,9 +72,6 @@ class Login(Menu):
         #ACCESS DATA from DATABASE
         def access_account(self):                 
 
-             self.logemail = self.login_userEntry.get().lower()
-             self.logpassword = self.login_passEntry.get()
-
              #Check Data
              conn = sqlite3.connect('useraccounts.db') #connect to the database
 
@@ -88,12 +85,12 @@ class Login(Menu):
 
 
              if dataget:
-                print(f"Matched Email:", self.login_userEntry.get(), "\nMatched Password:", self.login_passEntry.get())
+                print(f"Matched Username:", self.login_userEntry.get(), "\nMatched Password:", self.login_passEntry.get())
                 tk.messagebox.showinfo("Log in", "Log in Successful")
                 clear_logacct(self)   
                          
              else:
-                print(f"Wrong email /password: ", self.login_userEntry.get(), self.login_passEntry.get()) 
+                print(f"Wrong username /password: ", self.login_userEntry.get(), self.login_passEntry.get()) 
                 clear_logacct(self)
                 tk.messagebox.showerror("Log in", "Invalid Input")
                 return False 
@@ -227,35 +224,59 @@ class CreateAccount(Login):
              self.acct_nameEntry.delete(0,'end')
              self.acct_usernameEntry.delete(0,'end')
              self.acct_passEntry.delete(0,'end')
+          
 
         #INSERT DATA to DATABASE
         def register_account(self):
              #automatic time register
              dateNow = datetime.now()
-             dateStr = datetime.strftime(dateNow,'%m-%d-%Y')           
-
+             dateStr = datetime.strftime(dateNow,'%m-%d-%Y')      
+         
              if self.acct_nameEntry.get() == "" or  self.acct_usernameEntry.get() == "" or self.acct_passEntry.get() == "":
 
-                        messagebox.showerror("Error", "All entries must be filled")
-                        clear_createacct(self)
-                         
+                        tk.messagebox.showerror("Error", "All entries must be filled")
+                        clear_createacct(self)                         
 
              else:
-                        #Insert Data
-                        conn = sqlite3.connect('useraccounts.db') #connect to the database
-                                  
-                        data_insert_query = '''INSERT INTO accounts (name, username, password, date_registered) VALUES 
-                        (?, ?, ?, ?)'''
-                        data_insert_tuple = (self.acct_nameEntry.get().title(), self.acct_usernameEntry.get(),self.acct_passEntry.get(), dateStr)
-                        print(data_insert_tuple)
+                        #Check first if username is in database (Not accepting same username)
+                        conn = sqlite3.connect('useraccounts.db') #connect to the database  
+
+                        data_check_query = '''SELECT * FROM accounts WHERE  name = (?) OR username = (?) OR password = (?)'''
+                        data_check_tuple = (self.acct_nameEntry.get(), self.acct_usernameEntry.get(), self.acct_passEntry.get())
+                        print(f"Data Input: ", data_check_tuple)
                         cursor = conn.cursor()
-                        cursor.execute(data_insert_query, data_insert_tuple)
-                        conn.commit()
-                        messagebox.showinfo("Create Account", "New Account Created")
-                        conn.close()
-                        clear_createacct(self)
-                        Login(self)
-        
+                        data = cursor.execute(data_check_query, data_check_tuple) 
+                        dataget = cursor.fetchone()
+                        print(f"Database Record: \n", dataget) 
+                        conn.close() 
+
+                        if dataget: 
+                              
+                                print(f"Matched username in Database:", self.login_userEntry.get())
+                                tk.messagebox.showerror("Error", "Username Not Available")
+                                clear_createacct(self)
+
+
+                        else:                                  
+
+                                #Insert Data
+                                conn = sqlite3.connect('useraccounts.db') #connect to the database
+                                        
+                                data_insert_query = '''INSERT INTO accounts (name, username, password, date_registered) VALUES 
+                                (?, ?, ?, ?)'''
+                                data_insert_tuple = (self.acct_nameEntry.get().title(), self.acct_usernameEntry.get(),self.acct_passEntry.get(), dateStr)
+
+                                print(f"New Account: ", data_insert_tuple)
+
+                                cursor = conn.cursor()
+                                cursor.execute(data_insert_query, data_insert_tuple)
+                                conn.commit()              
+                                tk.messagebox.showinfo("Create Account", "New Account Created") 
+                                conn.close()       
+                                clear_createacct(self)                           
+                                Login(self)
+
+
                 
         # Create Account Frame
         self.create_acct_frame = Frame(self.mainframe, height=420, width=275)
@@ -352,7 +373,7 @@ class ResetPassword(CreateAccount):
                         print(f"Database Record: \n", row) 
 
                         if row == None:
-                                messagebox.showerror("Error", "Email not in Database")
+                                messagebox.showerror("Error", "Username not in Database")
                                 clear_resetacct(self)
                                 ResetPassword(self)
                              
