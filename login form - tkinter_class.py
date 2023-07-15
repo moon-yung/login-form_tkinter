@@ -85,7 +85,7 @@ class Login(Menu):
 
 
              if dataget:
-                print(f"Matched Username:", self.login_userEntry.get().title(), "\nMatched Password:", self.login_passEntry.get())
+                print(f"Matched Username:", self.login_userEntry.get().lower(), "\nMatched Password:", self.login_passEntry.get())
                 tk.messagebox.showinfo("Log in", "Log in Successful")
                 clear_logacct(self)   
                          
@@ -252,7 +252,7 @@ class CreateAccount(Login):
 
                         if dataget: 
                               
-                                print(f"Matched username in Database:", self.login_userEntry.get())
+                                print(f"Matched username in Database:", self.acct_usernameEntry.get().lower())
                                 tk.messagebox.showerror("Error", "Username Taken")
                                 clear_createacct(self)
 
