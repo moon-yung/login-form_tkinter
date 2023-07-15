@@ -76,7 +76,7 @@ class Login(Menu):
              conn = sqlite3.connect('useraccounts.db') #connect to the database
 
              data_check_query = '''SELECT * FROM accounts WHERE username = (?) AND password = (?)'''
-             data_check_tuple = (self.login_userEntry.get(),self.login_passEntry.get())
+             data_check_tuple = (self.login_userEntry.get().lower(),self.login_passEntry.get())
              print(f"Input: ", data_check_tuple)
              cursor = conn.cursor()
              data = cursor.execute(data_check_query, data_check_tuple) 
@@ -85,12 +85,12 @@ class Login(Menu):
 
 
              if dataget:
-                print(f"Matched Username:", self.login_userEntry.get(), "\nMatched Password:", self.login_passEntry.get())
+                print(f"Matched Username:", self.login_userEntry.get().title(), "\nMatched Password:", self.login_passEntry.get())
                 tk.messagebox.showinfo("Log in", "Log in Successful")
                 clear_logacct(self)   
                          
              else:
-                print(f"Wrong username /password: ", self.login_userEntry.get(), self.login_passEntry.get()) 
+                print(f"Wrong username /password: ", self.login_userEntry.get().lower(), self.login_passEntry.get()) 
                 clear_logacct(self)
                 tk.messagebox.showerror("Log in", "Invalid Input")
                 return False 
@@ -235,14 +235,14 @@ class CreateAccount(Login):
              if self.acct_nameEntry.get() == "" or  self.acct_usernameEntry.get() == "" or self.acct_passEntry.get() == "":
 
                         tk.messagebox.showerror("Error", "All entries must be filled")
-                        clear_createacct(self)                         
+                                               
 
              else:
                         #Check first if username is in database (Not accepting same username)
                         conn = sqlite3.connect('useraccounts.db') #connect to the database  
 
                         data_check_query = '''SELECT * FROM accounts WHERE  name = (?) OR username = (?) OR password = (?)'''
-                        data_check_tuple = (self.acct_nameEntry.get(), self.acct_usernameEntry.get(), self.acct_passEntry.get())
+                        data_check_tuple = (self.acct_nameEntry.get().title(), self.acct_usernameEntry.get().lower(), self.acct_passEntry.get())
                         print(f"Data Input: ", data_check_tuple)
                         cursor = conn.cursor()
                         data = cursor.execute(data_check_query, data_check_tuple) 
@@ -253,7 +253,7 @@ class CreateAccount(Login):
                         if dataget: 
                               
                                 print(f"Matched username in Database:", self.login_userEntry.get())
-                                tk.messagebox.showerror("Error", "Username Not Available")
+                                tk.messagebox.showerror("Error", "Username Taken")
                                 clear_createacct(self)
 
 
@@ -264,7 +264,7 @@ class CreateAccount(Login):
                                         
                                 data_insert_query = '''INSERT INTO accounts (name, username, password, date_registered) VALUES 
                                 (?, ?, ?, ?)'''
-                                data_insert_tuple = (self.acct_nameEntry.get().title(), self.acct_usernameEntry.get(),self.acct_passEntry.get(), dateStr)
+                                data_insert_tuple = (self.acct_nameEntry.get().title(), self.acct_usernameEntry.get().lower(),self.acct_passEntry.get(), dateStr)
 
                                 print(f"New Account: ", data_insert_tuple)
 
@@ -368,7 +368,7 @@ class ResetPassword(CreateAccount):
                         cursor = conn.cursor()
 
                         data_query = '''SELECT * FROM accounts WHERE username = (?)'''
-                        cursor.execute(data_query,[self.existing_userEntry.get()])                   
+                        cursor.execute(data_query,[self.existing_userEntry.get().lower()])                   
                         row = cursor.fetchone()
                         print(f"Database Record: \n", row) 
 
@@ -380,7 +380,7 @@ class ResetPassword(CreateAccount):
 
                         else:
                                 data_query = '''UPDATE accounts SET password = (?) WHERE username = (?)'''
-                                cursor.execute(data_query,[self.new_passEntry.get(), self.existing_userEntry.get()])
+                                cursor.execute(data_query,[self.new_passEntry.get(), self.existing_userEntry.get().lower()])
                                 conn.commit()
                                 conn.close()
                                 messagebox.showinfo("Reset Password", "Password Changed Successfully")
