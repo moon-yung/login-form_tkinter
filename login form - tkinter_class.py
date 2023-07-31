@@ -239,26 +239,16 @@ class CreateAccount(Login):
 
              else:
                         #Check first if username is in database (Not accepting same username)
-                        conn = sqlite3.connect('useraccounts.db') #connect to the database  
-
-                        data_check_query = '''SELECT * FROM accounts WHERE  name = (?) OR username = (?) OR password = (?)'''
-                        data_check_tuple = (self.acct_nameEntry.get().title(), self.acct_usernameEntry.get().lower(), self.acct_passEntry.get())
-                        print(f"Data Input: ", data_check_tuple)
+                        conn = sqlite3.connect('useraccounts.db') #connect to the database
                         cursor = conn.cursor()
-                        data = cursor.execute(data_check_query, data_check_tuple) 
-                        dataget = cursor.fetchone()
-                        print(f"Database Record: \n", dataget) 
-                        conn.close() 
 
-                        if dataget: 
-                              
-                                print(f"Matched username in Database:", self.acct_usernameEntry.get().lower())
-                                tk.messagebox.showerror("Error", "Username Taken")
-                                clear_createacct(self)
+                        data_query = '''SELECT * FROM accounts WHERE username = (?)'''
+                        cursor.execute(data_query,[self.acct_usernameEntry.get().lower()])                   
+                        row = cursor.fetchone()
+                        print(f"Database Record: \n", row) 
 
-
-                        else:                                  
-
+                        if row == None: 
+                                     
                                 #Insert Data
                                 conn = sqlite3.connect('useraccounts.db') #connect to the database
                                         
@@ -276,7 +266,12 @@ class CreateAccount(Login):
                                 clear_createacct(self)                           
                                 Login(self)
 
+                        else: 
 
+                                print(f"Matched username in Database:", self.acct_usernameEntry.get().lower())
+                                tk.messagebox.showerror("Error", "Username Taken")
+                                conn.close() 
+                                clear_createacct(self)                                             
                 
         # Create Account Frame
         self.create_acct_frame = Frame(self.mainframe, height=420, width=275)
